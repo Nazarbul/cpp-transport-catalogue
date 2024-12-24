@@ -11,9 +11,11 @@ namespace transport_catalogue {
 
         void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
             std::ostream& output);
-
+        void ReadForStreamandWriteToStream(const TransportCatalogue& transport_catalogue, 
+            std::istream& input, std::ostream& output);
         namespace detail {
-            void PrintBus(std::set<std::string_view> buses, std::ostream& output);
+            void PrintBus(const std::set<Bus*>& buses, std::ostream& output);
+            void PrintBusInfo(const BusInfo& bus, std::ostream& output);
         }
     }
 }

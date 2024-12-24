@@ -114,7 +114,7 @@ void transport_catalogue::input::InputReader::ApplyCommands
     for (CommandDescription cmd : commands_) {
         if (cmd.command == "Stop"s) {
             Stop stop = { cmd.id, transport_catalogue::detail::ParseCoordinates(cmd.description) };
-            catalogue.AddStop(std::move(stop));
+            catalogue.AddStop(stop);
         }
     }
 
@@ -127,7 +127,21 @@ void transport_catalogue::input::InputReader::ApplyCommands
                 stops.push_back(catalogue.FindStop(element));
             }
             Bus bus = { cmd.id, stops };
-            catalogue.AddBus(std::move(bus));
+            catalogue.AddBus(bus);
+        }
+    }   
+}
+
+void transport_catalogue::input::ReadForStream(TransportCatalogue& transport_catalogue, std::istream& input){
+        int base_request_count;
+        input >> base_request_count >> std::ws;
+        {
+            transport_catalogue::input::InputReader reader;
+            for (int i = 0; i < base_request_count; ++i) {
+                std::string line;
+                getline(input, line);
+                reader.ParseLine(line);
+            }
+        reader.ApplyCommands(transport_catalogue);
         }
     }
-}

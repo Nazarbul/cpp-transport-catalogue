@@ -38,5 +38,7 @@ namespace transport_catalogue {
         private:
             std::vector<CommandDescription> commands_;
         };
+
+        void ReadForStream(TransportCatalogue& transport_catalogue, std::istream& input);
     }
 }

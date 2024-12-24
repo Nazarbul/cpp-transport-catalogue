@@ -6,13 +6,26 @@
 using namespace std::literals;
 
 namespace transport_catalogue::output::detail {
-    void PrintBus(std::set<std::string_view> buses, std::ostream& output) {
+    void PrintBus(const std::set<Bus*>& buses, std::ostream& output) {
         for (const auto bus : buses) {
-            output << ' ' << bus;
+            output << ' ' << bus->name_;
+        }
+    }
+    void PrintBusInfo(const BusInfo& bus, std::ostream& output){
+        if (bus.name_.empty()) {
+            output<<": not found"s << std::endl;
+        }
+        else {
+            output <<bus.name_ << ": "s 
+            << bus.count_all_stops << " stops on route, "s 
+            << bus.count_unique_stops
+            << " unique stops, "s << std::setprecision(6) 
+            << bus.route_length 
+            << " route length"s << std::endl;
         }
     }
 }
-void transport_catalogue::output::ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
+void transport_catalogue::output::ParseAndPrintStat(const TransportCatalogue& transport_catalogue, std::string_view request,
     std::ostream& output) {
 
     size_t symbol = request.find(' ');
@@ -20,35 +33,36 @@ void transport_catalogue::output::ParseAndPrintStat(const TransportCatalogue& ta
     std::string_view command = request.substr(0, symbol);
     request = request.substr(symbol1);
     if (command == "Bus"s) {
-        Bus* bus = tansport_catalogue.FindBus(request);
-
-        if (bus == nullptr) {
-            output << command << ' ' << request << ": not found"s << std::endl;
-        }
-        else {
-            output << command << ' ' << bus->name_ << ": "s 
-            << bus->stops_.size() << " stops on route, "s 
-            << tansport_catalogue.GetUniqueStops(bus) 
-            << " unique stops, "s << std::setprecision(6) 
-            << tansport_catalogue.GetLengthRoute(bus) 
-            << " route length"s << std::endl;
-        }
+        output<<command<<' '<<request;
+        BusInfo bus = transport_catalogue.GetBusInfo(request);
+        detail::PrintBusInfo(bus, output);
     }
     if (command == "Stop"s) {
-        Stop* stop = tansport_catalogue.FindStop(request);
+        const Stop* stop = transport_catalogue.FindStop(request);
         if (stop == nullptr) {
             output << command << ' ' << request << ": not found"s << std::endl;
         }
         else {
-            std::set<std::string_view> result = tansport_catalogue.GetBusInfo(stop->name_);
+            const std::set<Bus*>& result = transport_catalogue.GetStopInfo(stop->name_);
             if (result.empty()) {
                 output << command << ' ' << stop->name_ << ": no buses"s << std::endl;
             }
             else {
                 output << command << ' ' << stop->name_ << ": buses"s;
-                output::detail::PrintBus(result, output);
+                detail::PrintBus(result, output);
                 output << std::endl;
             }
         }
+    }
+}
+
+void transport_catalogue::output::ReadForStreamandWriteToStream(const TransportCatalogue& transport_catalogue, 
+            std::istream& input, std::ostream& output){
+    int stat_request_count;
+    input >> stat_request_count >> std::ws;
+    for (int i = 0; i < stat_request_count; ++i) {
+        std::string line;
+        getline(input, line);
+        transport_catalogue::output::ParseAndPrintStat(transport_catalogue, line, output);
     }
 }
