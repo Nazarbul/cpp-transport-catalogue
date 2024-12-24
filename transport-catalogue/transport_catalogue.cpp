@@ -5,13 +5,13 @@
 namespace transport_catalogue {
 
     void TransportCatalogue::AddStop(const Stop& stop) {
-        stops_.push_back(std::move(stop));
+        stops_.push_back(stop);
         Stop* ptr_stop = &stops_[stops_.size() - 1];
         stopname_to_stops[ptr_stop->name_] = ptr_stop;
     }
 
     void TransportCatalogue::AddBus(const Bus& bus) {
-        buses_.push_back(std::move(bus));
+        buses_.push_back(bus);
         Bus* bus_ptr = &buses_[buses_.size() - 1];
         busname_to_buses[bus_ptr->name_] = bus_ptr;
         for (const auto stop : bus_ptr->stops_) {
@@ -32,9 +32,11 @@ namespace transport_catalogue {
 
     BusInfo TransportCatalogue::GetBusInfo(std::string_view busname) const {
         BusInfo result;
-        if(busname_to_buses.find(busname) != busname_to_buses.end()){
+        auto it = busname_to_buses.find(busname);
+        if( it != busname_to_buses.end()){
+            const Bus& bus = *(it->second);
             result.name_=busname;
-            result.count_all_stops = busname_to_buses.at(busname)->stops_.size();
+            result.count_all_stops = bus.stops_.size();
             result.count_unique_stops = GetUniqueStops(busname);
             result.route_length = GetLengthRoute(busname);
         }

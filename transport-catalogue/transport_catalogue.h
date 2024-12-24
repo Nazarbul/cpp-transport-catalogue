@@ -17,7 +17,7 @@ namespace transport_catalogue {
 
     struct Bus {
         std::string name_;
-        std::vector<Stop*> stops_;
+        std::vector<const Stop*> stops_;
     };
 
     struct BusInfo {

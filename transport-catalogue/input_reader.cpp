@@ -122,7 +122,7 @@ void transport_catalogue::input::InputReader::ApplyCommands
     for (CommandDescription cmd : commands_) {
         if (cmd.command == "Bus"s) {
             std::vector<std::string_view> route = transport_catalogue::detail::ParseRoute(cmd.description);
-            std::vector<Stop*>stops;
+            std::vector<const Stop*>stops;
             for (const auto element : route) {
                 stops.push_back(catalogue.FindStop(element));
             }
@@ -144,4 +144,4 @@ void transport_catalogue::input::ReadForStream(TransportCatalogue& transport_cat
             }
         reader.ApplyCommands(transport_catalogue);
         }
-    }
+}
