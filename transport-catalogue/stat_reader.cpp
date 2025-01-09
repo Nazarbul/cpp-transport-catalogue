@@ -6,9 +6,9 @@
 using namespace std::literals;
 
 namespace transport_catalogue::output::detail {
-    void PrintBus(const std::set<Bus*>& buses, std::ostream& output) {
+    void PrintBus(const std::set<std::string_view>& buses, std::ostream& output) {
         for (const auto bus : buses) {
-            output << ' ' << bus->name_;
+            output << ' ' << bus;
         }
     }
     void PrintBusInfo(const BusInfo& bus, std::ostream& output){
@@ -21,7 +21,8 @@ namespace transport_catalogue::output::detail {
             << bus.count_unique_stops
             << " unique stops, "s << std::setprecision(6) 
             << bus.route_length 
-            << " route length"s << std::endl;
+            << " route length, "s 
+            << bus.courvature<<" curvature"<< std::endl;
         }
     }
 }
@@ -43,7 +44,7 @@ void transport_catalogue::output::ParseAndPrintStat(const TransportCatalogue& tr
             output << command << ' ' << request << ": not found"s << std::endl;
         }
         else {
-            const std::set<Bus*>& result = transport_catalogue.GetStopInfo(stop->name_);
+            std::set<std::string_view> result = transport_catalogue.GetStopInfo(stop->name_);
             if (result.empty()) {
                 output << command << ' ' << stop->name_ << ": no buses"s << std::endl;
             }

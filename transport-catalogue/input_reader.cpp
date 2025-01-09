@@ -78,6 +78,36 @@ namespace transport_catalogue::detail {
 
         return results;
     }
+    std::pair <std::string_view, std::string_view> ParseStopDistances (std::string_view line){
+        line = Trim(line);
+        auto symbol_pos = line.find(',');
+        if (symbol_pos == line.npos){
+            return {};
+        }
+        auto symbol_pos1 = line.find(',', symbol_pos+1);
+
+        return {line.substr(0, symbol_pos1), line.substr(symbol_pos1+1)};
+    }
+
+
+    std::vector <std::pair <std::string_view, double>> ParseDistances(std::string_view distance){
+        distance = Trim(distance);
+        std::vector<std::pair<std::string_view, double>> result;
+        std::vector<std::string_view> stops = Split(distance, ',');
+        for (auto& element : stops){
+            auto start = element.find_first_not_of(' ');
+            auto delim = element.find('m');
+            auto delim1 = element.find('o', delim+1);
+            if (delim1==std::string_view::npos || delim == std::string_view::npos 
+            || start == std::string_view::npos){
+                return result;
+            }
+
+            result.push_back({Trim(element.substr(delim1+1)), (std::stod(std::string (element.substr(start, delim - start))))});
+        }
+
+        return result;
+    }
 }
 transport_catalogue::input::CommandDescription ParseCommandDescription(std::string_view line) {
     auto colon_pos = line.find(':');
@@ -94,10 +124,10 @@ transport_catalogue::input::CommandDescription ParseCommandDescription(std::stri
     if (not_space >= colon_pos) {
         return {};
     }
-
-    return { std::string(line.substr(0, space_pos)),
+    
+            return { std::string(line.substr(0, space_pos)),
             std::string(line.substr(not_space, colon_pos - not_space)),
-            std::string(line.substr(colon_pos + 1)) };
+            std::string(line.substr(colon_pos + 1))};
 }
 
 void transport_catalogue::input::InputReader::ParseLine(std::string_view line) {
@@ -113,8 +143,19 @@ void transport_catalogue::input::InputReader::ApplyCommands
     // Add all stops
     for (CommandDescription cmd : commands_) {
         if (cmd.command == "Stop"s) {
-            Stop stop = { cmd.id, transport_catalogue::detail::ParseCoordinates(cmd.description) };
+            std::pair <std::string_view, std::string_view> description = transport_catalogue::
+            detail::ParseStopDistances(cmd.description);
+            Stop stop = { cmd.id, transport_catalogue::detail::ParseCoordinates(description.first)};
             catalogue.AddStop(stop);
+        }
+    }
+
+    for (CommandDescription cmd : commands_){
+        if(cmd.command == "Stop"s){
+            std::pair<std::string_view, std::string_view> description = transport_catalogue::detail::ParseStopDistances(cmd.description);
+            for (const auto& element : transport_catalogue::detail::ParseDistances(description.second)){
+                catalogue.SetDistances(cmd.id, element.first, element.second);
+            }
         }
     }
 

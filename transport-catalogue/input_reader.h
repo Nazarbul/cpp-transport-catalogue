@@ -24,6 +24,7 @@ namespace transport_catalogue {
             std::string description;
         };
 
+
         class InputReader {
         public:
             /**
