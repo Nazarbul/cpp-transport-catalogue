@@ -80,7 +80,7 @@ namespace transport_catalogue {
 
 
 
-    void TransportCatalogue::SetDistances(const std::string_view from, const std::string_view to, const double distance){
+    void TransportCatalogue::SetDistance(const std::string_view from, const std::string_view to, const double distance){
         Stop* ptr_stop_from = FindStop(from);
         Stop* ptr_stop_to = FindStop(to);
         if(ptr_stop_from != nullptr && ptr_stop_to != nullptr){

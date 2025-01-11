@@ -24,6 +24,11 @@ namespace transport_catalogue {
             std::string description;
         };
 
+        struct StopDistances{
+            StopDistances(std::pair<std::string_view, double> distance) : distance_(distance){};
+            std::pair<std::string_view, double> distance_;
+        };
+
 
         class InputReader {
         public:

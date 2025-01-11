@@ -51,7 +51,7 @@ namespace transport_catalogue {
         Stop* FindStop(const std::string_view stop) const;
         BusInfo GetBusInfo(const std::string_view stopname) const;
         std::set<std::string_view> GetStopInfo(const std::string_view stopname) const;
-        void SetDistances(const std::string_view to, const std::string_view from, const double distance);
+        void SetDistance(const std::string_view to, const std::string_view from, const double distance);
     private:
         size_t GetUniqueStops(std::string_view busname) const;
         double GetLengthRoute(std::string_view busname) const;

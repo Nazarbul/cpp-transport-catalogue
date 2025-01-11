@@ -90,9 +90,9 @@ namespace transport_catalogue::detail {
     }
 
 
-    std::vector <std::pair <std::string_view, double>> ParseDistances(std::string_view distance){
+    std::vector <transport_catalogue::input::StopDistances> ParseDistances(std::string_view distance){
         distance = Trim(distance);
-        std::vector<std::pair<std::string_view, double>> result;
+        std::vector<transport_catalogue::input::StopDistances> result;
         std::vector<std::string_view> stops = Split(distance, ',');
         for (auto& element : stops){
             auto start = element.find_first_not_of(' ');
@@ -103,7 +103,8 @@ namespace transport_catalogue::detail {
                 return result;
             }
 
-            result.push_back({Trim(element.substr(delim1+1)), (std::stod(std::string (element.substr(start, delim - start))))});
+            result.push_back(transport_catalogue::input::StopDistances(std::pair<std::string_view, double>{Trim(element.substr(delim1+1)), 
+            (std::stod(std::string (element.substr(start, delim - start))))}));
         }
 
         return result;
@@ -125,7 +126,7 @@ transport_catalogue::input::CommandDescription ParseCommandDescription(std::stri
         return {};
     }
     
-            return { std::string(line.substr(0, space_pos)),
+    return {std::string(line.substr(0, space_pos)),
             std::string(line.substr(not_space, colon_pos - not_space)),
             std::string(line.substr(colon_pos + 1))};
 }
@@ -154,7 +155,7 @@ void transport_catalogue::input::InputReader::ApplyCommands
         if(cmd.command == "Stop"s){
             std::pair<std::string_view, std::string_view> description = transport_catalogue::detail::ParseStopDistances(cmd.description);
             for (const auto& element : transport_catalogue::detail::ParseDistances(description.second)){
-                catalogue.SetDistances(cmd.id, element.first, element.second);
+                catalogue.SetDistance(cmd.id, element.distance_.first, element.distance_.second);
             }
         }
     }
@@ -183,6 +184,6 @@ void transport_catalogue::input::ReadForStream(TransportCatalogue& transport_cat
                 getline(input, line);
                 reader.ParseLine(line);
             }
-        reader.ApplyCommands(transport_catalogue);
+            reader.ApplyCommands(transport_catalogue);
         }
 }
