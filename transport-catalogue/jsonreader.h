@@ -6,31 +6,41 @@
 #include "transport_catalogue.h"
 #include "json.h"
 #include "map_render.h"
+#include "request_handler.h"
 
 using namespace json;
 using namespace domain;
 
-namespace transport_catalogue {
-    namespace jsonreader {
+namespace transport_catalogue
+{
+    namespace jsonreader
+    {
 
-        class JsonReader{
-            public:
-            JsonReader() = default;
-            JsonReader(Document document) : document_(document){};
-            JsonReader(std::istream& input) : document_(json::Load(input)){};
-            Stop ParseNodeStop(Node& node);
-            Bus ParseNodeBus(Node& node, TransportCatalogue& catalogue);
-            void ParseNodeDistance(Node& node, TransportCatalogue& catalogue);
-            void ParseNodeBase(const Node& node, TransportCatalogue& catalogue);
-            void ParseNodeStat(const Node& node, std::vector<StatRequest>& stat_request);
-            void ParseNodeRequest(const Node& node, map_render::Render_settings& render_settings);
-            void ParseNode(const Node& node, TransportCatalogue& catalogue, map_render::Render_settings& render_settings,
-            std::vector<StatRequest>& stat_request);
-            void Parse(TransportCatalogue& catalogue, map_render::Render_settings& render_settings,
-            std::vector<StatRequest>& stat_request);
-            const Document& get_document() const;
-            private:
+        class JsonReader
+        {
+        public:
+            JsonReader(std::istream &input, TransportCatalogue& catalogue, map_render::RenderSettings& render_settings): document_(json::Load(input)), 
+            catalogue_(catalogue), render_settings_(std::move(render_settings)){};
+            void FillCatalogue();
+            const json::Node GetStatRequest();
+            const json::Node GetRenderRequest();
+            map_render::MapRender ParseNodeRequest(const Node &node);
+            void Execute_Queries(const Node &stat_requests, request_handler::RequestHandler &request_handler) const;
+            
+        private:
             Document document_;
+            TransportCatalogue& catalogue_;
+            map_render::RenderSettings render_settings_;
+            Stop FillStop(Node &node);
+            Bus FillBus(Node &node);
+            void FillStopDistance(Node &node);
+            json::Node StopQuery(const Dict &stat_requests, const request_handler::RequestHandler &request_handler) const;
+            json::Node BusQuery(const Dict &stat_requests,const request_handler::RequestHandler &request_handler) const;
+            json::Node RenderMapQuery(const Dict &stat_requests, request_handler::RequestHandler &request_handler) const;
+            void SetBasicSettings(map_render::RenderSettings &render_settings, const Dict &node);
+            void SetLabelSettings(map_render::RenderSettings &render_settings, const Dict &node);
+            void SetUnderlayerSettings(map_render::RenderSettings &render_settings, const Dict &node);
+            void SetColorPaletteSettings(map_render::RenderSettings &render_settings, const Dict &node);
         };
 
     }

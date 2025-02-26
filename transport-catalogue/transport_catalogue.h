@@ -8,41 +8,46 @@
 #include <unordered_set>
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 #include "geo.h"
 #include "domain.h"
 
-namespace transport_catalogue {
-    
-    struct DistanceHasher {
-        size_t operator()(const std::pair<const domain::Stop*, const domain::Stop*> distances) const{
+namespace transport_catalogue
+{
+
+    struct DistanceHasher
+    {
+        size_t operator()(const std::pair<const domain::Stop *, const domain::Stop *> distances) const
+        {
             return hasher_p_(distances.first) + 42 * hasher_p_(distances.second);
         }
-        private:
-        std::hash<const domain::Stop*> hasher_p_; 
+
+    private:
+        std::hash<const domain::Stop *> hasher_p_;
     };
 
-    class TransportCatalogue {
+    class TransportCatalogue
+    {
     public:
-        void AddStop(const domain::Stop& stop);
-        void AddBus(const domain::Bus& bus);
-        domain::Bus* FindBus(std::string_view bus) const;
-        domain::Stop* FindStop(const std::string_view stop);
+        void AddStop(const domain::Stop &stop);
+        void AddBus(const domain::Bus &bus);
+        domain::Bus *FindBus(std::string_view bus) const;
+        domain::Stop *FindStop(const std::string_view stop) const;
         void SetDistances(const std::string_view to, const std::string_view from, const double distance);
-        std::unordered_map<std::string_view, domain::Bus*> GetBuses() const;
-        std::unordered_map<std::string_view, domain::Stop*> GetStops() const;
-        std::unordered_set<const domain::Bus*> GetBusesToStops(std::string_view stop);
+        const std::map<std::string_view, domain::Bus *>& GetBuses() const;
+        const std::unordered_map<std::string_view, domain::Stop *>& GetStops() const;
+        double GetDistances(const std::string_view busname) const;
         size_t GetUniqueStops(std::string_view busname) const;
         double GetLengthRoute(std::string_view busname) const;
-        double GetDistances(const std::string_view busname) const;
-        
+
     private:
-        size_t GetDistanceBetweenStops(const domain::Stop* from, const domain::Stop* to) const;
-        std::deque <domain::Stop> stops_;
-        std::deque <domain::Bus> buses_;
-        std::unordered_map<std::string_view, domain::Stop*> stopname_to_stops;
-        std::unordered_map<std::string_view, domain::Bus*> busname_to_buses;
-        std::unordered_map<std::string_view, std::set<domain::Bus*>> bus_to_stops;
-        std::unordered_map<std::pair<const domain::Stop*, const domain::Stop*>, size_t, DistanceHasher> Distances;
+        size_t GetDistanceBetweenStops(const domain::Stop *from, const domain::Stop *to) const;
+        std::deque<domain::Stop> stops_;
+        std::deque<domain::Bus> buses_;
+        std::unordered_map<std::string_view, domain::Stop *> stopname_to_stops;
+        std::map<std::string_view, domain::Bus *> busname_to_buses;
+        std::unordered_map<std::string_view, std::set<domain::Bus *>> bus_to_stops;
+        std::unordered_map<std::pair<const domain::Stop *, const domain::Stop *>, size_t, DistanceHasher> distances;
     };
 }
