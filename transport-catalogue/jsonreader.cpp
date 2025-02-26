@@ -292,7 +292,7 @@ namespace transport_catalogue
             return render_settings_;
         }
 
-        void JsonReader::Execute_Queries(const Node &stat_requests,
+        void JsonReader::ExecuteQueries(const Node &stat_requests,
                                          request_handler::RequestHandler &request_handler) const
         {
             Array result_request;

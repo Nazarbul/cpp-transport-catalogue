@@ -25,7 +25,7 @@ namespace transport_catalogue
             const json::Node GetStatRequest();
             const json::Node GetRenderRequest();
             map_render::MapRender ParseNodeRequest(const Node &node);
-            void Execute_Queries(const Node &stat_requests, request_handler::RequestHandler &request_handler) const;
+            void ExecuteQueries(const Node &stat_requests, request_handler::RequestHandler &request_handler) const;
             
         private:
             Document document_;

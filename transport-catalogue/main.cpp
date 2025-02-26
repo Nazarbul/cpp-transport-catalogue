@@ -18,7 +18,7 @@ int main()
     const auto& node_render_settings = json_reader.GetRenderRequest();
     const auto map_render = json_reader.ParseNodeRequest(node_render_settings);
     request_handler::RequestHandler RequestHandler(catalogue, map_render);
-    json_reader.Execute_Queries(stat_request, RequestHandler);
+    json_reader.ExecuteQueries(stat_request, RequestHandler);
     }
     catch(const std::exception& e){
         std::cerr << "Ошибка: "s << e.what() << std::endl;
