@@ -41,12 +41,4 @@ namespace domain
         double route_length;
         double courvature;
     };
-
-    struct StopInfo
-    {
-        std::string name_;
-        std::vector<std::string> buses_;
-        bool not_found;
-    };
-
 }
