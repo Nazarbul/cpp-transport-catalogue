@@ -41,6 +41,7 @@ namespace transport_catalogue
             void SetLabelSettings(map_render::RenderSettings &render_settings, const Dict &node);
             void SetUnderlayerSettings(map_render::RenderSettings &render_settings, const Dict &node);
             void SetColorPaletteSettings(map_render::RenderSettings &render_settings, const Dict &node);
+            void ParseBaseRequest(Array& base_request,std::vector<Node>& buses, std::vector<Node>& stops);
         };
 
     }

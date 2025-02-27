@@ -87,17 +87,10 @@ namespace transport_catalogue
             return bus;
         }
 
-        void JsonReader::FillCatalogue()
-        {
-            Array base_request;
+        void JsonReader::ParseBaseRequest(Array& base_request, std::vector<Node>& buses, std::vector<Node>& stops){
             Dict req_map;
             Node req_node;
-            std::vector<Node> buses;
-            std::vector<Node> stops;
-            if (document_.GetRoot().AsMap().count("base_requests"))
-            {
-                base_request = document_.GetRoot().AsMap().at("base_requests").AsArray();
-                for (auto &node : base_request)
+            for (auto &node : base_request)
                 {
                     if (node.IsMap())
                     {
@@ -123,6 +116,17 @@ namespace transport_catalogue
                         }
                     }
                 }
+        }
+
+        void JsonReader::FillCatalogue()
+        {
+            Array base_request;
+            std::vector<Node> buses;
+            std::vector<Node> stops;
+            if (document_.GetRoot().AsMap().count("base_requests"))
+            {
+                base_request = document_.GetRoot().AsMap().at("base_requests").AsArray();
+                ParseBaseRequest(base_request, buses, stops);
                 for (auto stop : stops)
                 {
                     catalogue_.AddStop(FillStop(stop));

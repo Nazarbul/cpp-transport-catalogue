@@ -9,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
+#include <optional>
 
 #include "geo.h"
 #include "domain.h"
@@ -38,11 +39,12 @@ namespace transport_catalogue
         const std::map<std::string_view, domain::Bus *>& GetBuses() const;
         const std::unordered_map<std::string_view, domain::Stop *>& GetStops() const;
         double GetDistances(const std::string_view busname) const;
-        size_t GetUniqueStops(std::string_view busname) const;
-        double GetLengthRoute(std::string_view busname) const;
+        std::optional<domain::BusInfo> BusInfo(const std::string_view busname) const;
 
     private:
         size_t GetDistanceBetweenStops(const domain::Stop *from, const domain::Stop *to) const;
+        size_t GetUniqueStops(std::string_view busname) const;
+        double GetLengthRoute(std::string_view busname) const;
         std::deque<domain::Stop> stops_;
         std::deque<domain::Bus> buses_;
         std::unordered_map<std::string_view, domain::Stop *> stopname_to_stops;
