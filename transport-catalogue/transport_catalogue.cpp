@@ -99,31 +99,30 @@ namespace transport_catalogue
         return distance;
     }
 
-    const std::map<std::string_view, domain::Bus *>& TransportCatalogue::GetBuses() const
+    const std::map<std::string_view, domain::Bus *> &TransportCatalogue::GetBuses() const
     {
         return busname_to_buses;
     }
 
-    const std::unordered_map<std::string_view, domain::Stop *>& TransportCatalogue::GetStops() const
+    const std::unordered_map<std::string_view, domain::Stop *> &TransportCatalogue::GetStops() const
     {
         return stopname_to_stops;
     }
 
     std::optional<domain::BusInfo> TransportCatalogue::BusInfo(const std::string_view busname) const
-{
-    domain::BusInfo bus_info;
-    const auto bus = FindBus(busname);
-    if (bus)
     {
-        bus_info.name_ = busname;
-        bus_info.count_unique_stops = GetUniqueStops(busname);
-        bus_info.count_all_stops = bus->stops_.size();
-        bus_info.route_length = GetDistances(busname);
-        bus_info.geo_length = GetLengthRoute(busname);
-        bus_info.courvature = bus_info.route_length / bus_info.geo_length;
-        return bus_info;
+        domain::BusInfo bus_info;
+        const auto bus = FindBus(busname);
+        if (bus)
+        {
+            bus_info.name_ = busname;
+            bus_info.count_unique_stops = GetUniqueStops(busname);
+            bus_info.count_all_stops = bus->stops_.size();
+            bus_info.route_length = GetDistances(busname);
+            bus_info.geo_length = GetLengthRoute(busname);
+            bus_info.courvature = bus_info.route_length / bus_info.geo_length;
+            return bus_info;
+        }
+        return std::nullopt;
     }
-    return std::nullopt;
-    
-}
 }

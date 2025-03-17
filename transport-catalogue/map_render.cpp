@@ -2,7 +2,6 @@
 
 using namespace map_render;
 
-
 svg::Point SphereProjector::operator()(geo::Coordinates coordinates) const
 {
     return {
@@ -10,7 +9,7 @@ svg::Point SphereProjector::operator()(geo::Coordinates coordinates) const
         (max_lat_ - coordinates.lat) * zoom_coeff_ + padding_};
 }
 
-const svg::Color& MapRender::GetColor(size_t line_number) const
+const svg::Color &MapRender::GetColor(size_t line_number) const
 {
     return render_settings_.color_palette[line_number];
 }
@@ -25,7 +24,7 @@ void MapRender::SetLineProperties(svg::Polyline &polyline, size_t palette_index)
     polyline.SetStrokeLineJoin(svg::StrokeLineJoin::ROUND);
 }
 void ::MapRender::SetRouteTextColorProperties(svg::Text &text, const std::string &name,
-                                                  const svg::Point &position, size_t palette_number) const
+                                              const svg::Point &position, size_t palette_number) const
 {
     text.SetFillColor(GetColor(palette_number));
     SetRouteCommonProperties(text, name, position);
@@ -49,7 +48,7 @@ void MapRender::SetRouteCircleProperties(svg::Circle &circle, const svg::Point &
 }
 
 void MapRender::SetStopTextProperties(svg::Text &text, const std::string &name,
-                                         const svg::Point &position) const
+                                      const svg::Point &position) const
 {
     using namespace std::literals;
     text.SetFillColor(render_settings_.underlayer_color);
@@ -61,14 +60,14 @@ void MapRender::SetStopTextProperties(svg::Text &text, const std::string &name,
 }
 
 void MapRender::SetStopTextColorProperties(svg::Text &text,
-                                                const std::string& name, const svg::Point &position) const
+                                           const std::string &name, const svg::Point &position) const
 {
     using namespace std::literals;
     text.SetFillColor("black"s);
     SetStopCommonProperties(text, name, position);
 }
 
-void MapRender::SetRouteCommonProperties(svg::Text &text, const std::string& name, const svg::Point &position) const
+void MapRender::SetRouteCommonProperties(svg::Text &text, const std::string &name, const svg::Point &position) const
 {
     using namespace std::literals;
     text.SetPosition(position);
@@ -95,8 +94,8 @@ bool SphereProjector::IsZero(double value)
 }
 
 std::vector<svg::Polyline> MapRender::AddLine(const std::map<std::string_view,
-                                                                        domain::Bus *> &buses,
-                                               SphereProjector &Sphere_Projector) const
+                                                             domain::Bus *> &buses,
+                                              SphereProjector &Sphere_Projector) const
 {
     std::vector<svg::Polyline> results;
     size_t palette_index = 0;
@@ -119,15 +118,15 @@ std::vector<svg::Polyline> MapRender::AddLine(const std::map<std::string_view,
     return results;
 }
 
-void MapRender::SettingsForRoute(svg::Text &roundtrip_bus_name, svg::Text &bus_roundtrip_title, const std::string& name,
-                                       svg::Point x, size_t color_index) const
+void MapRender::SettingsForRoute(svg::Text &roundtrip_bus_name, svg::Text &bus_roundtrip_title, const std::string &name,
+                                 svg::Point x, size_t color_index) const
 {
     SetRouteTextProperties(roundtrip_bus_name, name, x);
     SetRouteTextColorProperties(bus_roundtrip_title, name, x, color_index);
 }
 
 std::vector<svg::Text> MapRender::AddBusesName(const std::map<std::string_view, domain::Bus *> &buses,
-                                                 SphereProjector &Sphere_Projector) const
+                                               SphereProjector &Sphere_Projector) const
 {
     std::vector<svg::Text> result;
     size_t color_index = 0;
@@ -145,20 +144,20 @@ std::vector<svg::Text> MapRender::AddBusesName(const std::map<std::string_view, 
         if (bus->is_roundtrip)
         {
             SettingsForRoute(roundtrip_bus_name, roundtrip_title_name, bus->name_,
-                                   Sphere_Projector(stops_for_bus[0]->coordinates), color_index);
+                             Sphere_Projector(stops_for_bus[0]->coordinates), color_index);
             result.push_back(std::move(roundtrip_bus_name));
             result.push_back(std::move(roundtrip_title_name));
         }
         else
         {
             SettingsForRoute(nonroundtrip_bus_name, nonroundtrip_title_name, bus->name_,
-                                Sphere_Projector(stops_for_bus[0]->coordinates), color_index);
+                             Sphere_Projector(stops_for_bus[0]->coordinates), color_index);
             result.push_back(std::move(nonroundtrip_bus_name));
             result.push_back(std::move(nonroundtrip_title_name));
             if (stops_for_bus[0]->coordinates != stops_for_bus[stops_for_bus.size() / 2]->coordinates)
             {
                 SettingsForRoute(nonroundtrip_bus_name, nonroundtrip_title_name, bus->name_,
-                                    Sphere_Projector(stops_for_bus[stops_for_bus.size() / 2]->coordinates), color_index);
+                                 Sphere_Projector(stops_for_bus[stops_for_bus.size() / 2]->coordinates), color_index);
                 result.push_back(std::move(nonroundtrip_bus_name));
                 result.push_back(std::move(nonroundtrip_title_name));
             }
@@ -170,7 +169,7 @@ std::vector<svg::Text> MapRender::AddBusesName(const std::map<std::string_view, 
 }
 
 std::vector<svg::Circle> MapRender::AddStopsCircle(const std::map<std::string_view, domain::Stop *> &stops,
-                                                     SphereProjector &Sphere_Projector) const
+                                                   SphereProjector &Sphere_Projector) const
 {
     svg::Circle circle;
     std::vector<svg::Circle> result;
@@ -192,7 +191,7 @@ std::vector<svg::Text> MapRender::AddStopsName(const std::map<std::string_view, 
         SetStopTextProperties(stop_name, stop->name_, Sphere_Projector(stop->coordinates));
         result.push_back(std::move(stop_name));
         SetStopTextColorProperties(stop_name_title, stop->name_,
-                                       Sphere_Projector(stop->coordinates));
+                                   Sphere_Projector(stop->coordinates));
         result.push_back(std::move(stop_name_title));
     }
     return result;

@@ -90,7 +90,7 @@ namespace map_render
     class MapRender
     {
     public:
-        MapRender(RenderSettings& render_settings) : render_settings_(render_settings) {};
+        MapRender(RenderSettings &render_settings) : render_settings_(render_settings) {};
         svg::Document RenderMap(const std::map<std::string_view, domain::Bus *> &buses) const;
 
     private:
@@ -108,13 +108,14 @@ namespace map_render
         void SetRouteCommonProperties(svg::Text &text, const std::string &name, const svg::Point &position) const;
         void SetStopCommonProperties(svg::Text &text, const std::string &name, const svg::Point &position) const;
         std::vector<svg::Polyline> AddLine(const std::map<std::string_view,
-                                            domain::Bus *> &buses, SphereProjector &Sphere_Projector) const;
+                                                          domain::Bus *> &buses,
+                                           SphereProjector &Sphere_Projector) const;
         std::vector<svg::Text> AddBusesName(const std::map<std::string_view, domain::Bus *> &buses,
                                             SphereProjector &Sphere_Projector) const;
         std::vector<svg::Circle> AddStopsCircle(const std::map<std::string_view, domain::Stop *> &stops,
                                                 SphereProjector &Sphere_Projector) const;
-        std::vector<svg::Text> AddStopsName(const std::map<std::string_view, domain::Stop *> &stops, 
+        std::vector<svg::Text> AddStopsName(const std::map<std::string_view, domain::Stop *> &stops,
                                             SphereProjector &Sphere_Projector) const;
-        RenderSettings& render_settings_;
+        RenderSettings &render_settings_;
     };
 }

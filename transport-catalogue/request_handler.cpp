@@ -2,7 +2,6 @@
 
 using namespace request_handler;
 
-
 svg::Document RequestHandler::RenderMap() const
 {
     auto buses = catalogue_.GetBuses();
@@ -14,7 +13,7 @@ bool RequestHandler::SearchStopName(const std::string_view stopname) const
     return catalogue_.FindStop(stopname);
 }
 
-const std::set<std::string>& RequestHandler::GetBusesOnStop(const std::string_view stopname) const
+const std::set<std::string> &RequestHandler::GetBusesOnStop(const std::string_view stopname) const
 {
     return catalogue_.FindStop(stopname)->buses;
 }
@@ -26,6 +25,6 @@ bool RequestHandler::SearchBusNumber(const std::string_view busname) const
 
 std::optional<domain::BusInfo> RequestHandler::GetBusInfo(const std::string_view busname) const
 {
-    const auto& bus_info = catalogue_.BusInfo(busname);
+    const auto &bus_info = catalogue_.BusInfo(busname);
     return bus_info;
 }

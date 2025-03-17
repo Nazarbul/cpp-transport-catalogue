@@ -87,35 +87,36 @@ namespace transport_catalogue
             return bus;
         }
 
-        void JsonReader::ParseBaseRequest(Array& base_request, std::vector<Node>& buses, std::vector<Node>& stops){
+        void JsonReader::ParseBaseRequest(Array &base_request, std::vector<Node> &buses, std::vector<Node> &stops)
+        {
             Dict req_map;
             Node req_node;
             for (auto &node : base_request)
+            {
+                if (node.IsMap())
                 {
-                    if (node.IsMap())
+                    req_map = node.AsMap();
+                    try
                     {
-                        req_map = node.AsMap();
-                        try
+                        req_node = req_map.at("type");
+                        if (req_node.IsString())
                         {
-                            req_node = req_map.at("type");
-                            if (req_node.IsString())
+                            if (req_node.AsString() == "Bus")
                             {
-                                if (req_node.AsString() == "Bus")
-                                {
-                                    buses.push_back(req_map);
-                                }
-                                else if (req_node.AsString() == "Stop")
-                                {
-                                    stops.push_back(req_map);
-                                }
+                                buses.push_back(req_map);
+                            }
+                            else if (req_node.AsString() == "Stop")
+                            {
+                                stops.push_back(req_map);
                             }
                         }
-                        catch (const std::out_of_range &)
-                        {
-                            throw std::runtime_error("Error: base_requests not have type value");
-                        }
+                    }
+                    catch (const std::out_of_range &)
+                    {
+                        throw std::runtime_error("Error: base_requests not have type value");
                     }
                 }
+            }
         }
 
         void JsonReader::FillCatalogue()
@@ -297,7 +298,7 @@ namespace transport_catalogue
         }
 
         void JsonReader::ExecuteQueries(const Node &stat_requests,
-                                         request_handler::RequestHandler &request_handler) const
+                                        request_handler::RequestHandler &request_handler) const
         {
             Array result_request;
             Dict stat_request;
@@ -322,7 +323,7 @@ namespace transport_catalogue
 
         json::Node JsonReader::StopQuery(const Dict &stat_request, const request_handler::RequestHandler &request_handler) const
         {
-            Dict result;
+            json::Node result;
             Array buses_;
             std::string stop_name = stat_request.at("name").AsString();
             auto stop = request_handler.SearchStopName(stop_name);
@@ -330,7 +331,6 @@ namespace transport_catalogue
             const auto result_id = stat_request.at("id").AsInt();
             if (stop)
             {
-                result.emplace("request_id", Node{result_id});
                 auto buses = request_handler.GetBusesOnStop(stop_name);
                 if (buses.size() > 0)
                 {
@@ -341,49 +341,44 @@ namespace transport_catalogue
                 }
                 std::sort(buses_.begin(), buses_.end(), [](const json::Node &lhs, json::Node &rhs)
                           { return lhs.AsString() < rhs.AsString(); });
-                result.emplace("buses", Node{buses_});
+                result = json::Builder{}.StartDict().Key("request_id").Value(result_id).Key("buses").Value(buses_).EndDict().Build();
             }
             else
             {
-                result.emplace("request_id", Node{result_id});
-                result.emplace("error_message", Node{str_not_found});
+                result = json::Builder{}.StartDict().Key("request_id").Value(result_id).Key("error_message").Value(str_not_found).EndDict().Build();
             }
-            return Node{result};
+            return result;
         }
 
         json::Node JsonReader::BusQuery(const Dict &stat_request,
                                         const request_handler::RequestHandler &request_handler) const
         {
-            Dict result;
+            Node result;
             std::string bus_name = stat_request.at("name").AsString();
             auto bus = request_handler.SearchBusNumber(bus_name);
             const auto result_id = stat_request.at("id").AsInt();
             std::string str_not_found = "not found";
             if (bus)
             {
-                result.emplace("request_id", Node{result_id});
                 const auto &bus_info = request_handler.GetBusInfo(bus_name);
-                result.emplace("curvature", Node{bus_info->courvature});
-                result.emplace("route_length", Node{bus_info->route_length});
-                result.emplace("stop_count", Node{static_cast<int>(bus_info->count_all_stops)});
-                result.emplace("unique_stop_count", Node{static_cast<int>(bus_info->count_unique_stops)});
+                result = Builder{}.StartDict().Key("request_id").Value(result_id).Key("curvature").Value(bus_info->courvature)
+                .Key("route_length").Value(bus_info->route_length).Key("stop_count").Value(static_cast<int>(bus_info->count_all_stops))
+                .Key("unique_stop_count").Value(static_cast<int>(bus_info->count_unique_stops)).EndDict().Build();
             }
             else
             {
-                result.emplace("request_id", Node{result_id});
-                result.emplace("error_message", Node{str_not_found});
+                result = Builder{}.StartDict().Key("request_id").Value(result_id).Key("error_message").Value(str_not_found).EndDict().Build();
             }
             return result;
         }
         json::Node JsonReader::RenderMapQuery(const Dict &stat_requests, request_handler::RequestHandler &request_handler) const
         {
-            Dict result;
+            Node result;
             std::ostringstream out;
             const int id = stat_requests.at("id").AsInt();
             auto map = request_handler.RenderMap();
             map.Render(out);
-            result.emplace("request_id", Node{id});
-            result.emplace("map", Node{out.str()});
+            result = Builder{}.StartDict().Key("request_id").Value(id).Key("map").Value(out.str()).EndDict().Build();
             return result;
         }
     }

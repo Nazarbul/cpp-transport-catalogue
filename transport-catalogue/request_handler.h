@@ -17,7 +17,7 @@ namespace request_handler
         svg::Document RenderMap() const;
         bool SearchStopName(const std::string_view stopname) const;
         bool SearchBusNumber(const std::string_view busname) const;
-        const std::set<std::string>& GetBusesOnStop(std::string_view stopname) const;
+        const std::set<std::string> &GetBusesOnStop(std::string_view stopname) const;
         std::optional<domain::BusInfo> GetBusInfo(const std::string_view busname) const;
 
     private:

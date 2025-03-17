@@ -36,8 +36,8 @@ namespace transport_catalogue
         domain::Bus *FindBus(std::string_view bus) const;
         domain::Stop *FindStop(const std::string_view stop) const;
         void SetDistances(const std::string_view to, const std::string_view from, const double distance);
-        const std::map<std::string_view, domain::Bus *>& GetBuses() const;
-        const std::unordered_map<std::string_view, domain::Stop *>& GetStops() const;
+        const std::map<std::string_view, domain::Bus *> &GetBuses() const;
+        const std::unordered_map<std::string_view, domain::Stop *> &GetStops() const;
         double GetDistances(const std::string_view busname) const;
         std::optional<domain::BusInfo> BusInfo(const std::string_view busname) const;
 
