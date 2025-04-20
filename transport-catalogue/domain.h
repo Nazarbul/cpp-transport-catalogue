@@ -41,4 +41,10 @@ namespace domain
         double route_length;
         double courvature;
     };
+
+    struct StopId
+    {
+        size_t input_id = 0;
+        size_t output_id = 0;
+    };
 }

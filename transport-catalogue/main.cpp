@@ -3,6 +3,7 @@
 #include "domain.h"
 #include "map_render.h"
 #include "request_handler.h"
+#include "transport_router.h"
 
 using namespace std;
 
@@ -16,8 +17,11 @@ int main()
         json_reader.FillCatalogue();
         const auto &stat_request = json_reader.GetStatRequest();
         const auto &node_render_settings = json_reader.GetRenderRequest();
+        const auto &routing_settings = json_reader.GetRoutingRequest();
         const auto map_render = json_reader.ParseNodeRequest(node_render_settings);
-        request_handler::RequestHandler RequestHandler(catalogue, map_render);
+        const auto &full_routing = json_reader.FillRouting(routing_settings);
+        route::Router router(full_routing, catalogue);
+        request_handler::RequestHandler RequestHandler(catalogue, map_render, router);
         json_reader.ExecuteQueries(stat_request, RequestHandler);
     }
     catch (const std::exception &e)

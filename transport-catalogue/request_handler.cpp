@@ -28,3 +28,9 @@ std::optional<domain::BusInfo> RequestHandler::GetBusInfo(const std::string_view
     const auto &bus_info = catalogue_.BusInfo(busname);
     return bus_info;
 }
+
+std::optional<std::pair<graph::Router<route::RouteWeight>::RouteInfo, std::vector<route::RouteWeight>>> RequestHandler::GetRouting(std::string_view from,
+                                                                                                                                   std::string_view to) const
+{
+    return router_.FindRoute(from, to);
+}

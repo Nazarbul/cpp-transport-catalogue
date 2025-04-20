@@ -98,7 +98,7 @@ namespace transport_catalogue
                     req_map = node.AsMap();
                     try
                     {
-                        req_node = req_map.at("type");
+                        req_node = req_map.at("type").AsString();
                         if (req_node.IsString())
                         {
                             if (req_node.AsString() == "Bus")
@@ -159,6 +159,23 @@ namespace transport_catalogue
                 return nullptr;
             }
             return document_.GetRoot().AsMap().at("render_settings");
+        }
+
+        const json::Node JsonReader::GetRoutingRequest()
+        {
+            if (!document_.GetRoot().AsMap().count("routing_settings"))
+            {
+                return nullptr;
+            }
+            return document_.GetRoot().AsMap().at("routing_settings");
+        }
+
+        route::RoutingSettings JsonReader::FillRouting(const Node &routing_settings) const
+        {
+            const auto &wait_time = routing_settings.AsMap().at("bus_wait_time").AsInt();
+            const auto &velocity = routing_settings.AsMap().at("bus_velocity").AsDouble();
+            static route::RoutingSettings settings{wait_time, velocity};
+            return settings;
         }
 
         void JsonReader::SetBasicSettings(map_render::RenderSettings &render_settings, const Dict &root_dict)
@@ -317,6 +334,10 @@ namespace transport_catalogue
                 {
                     result_request.push_back(RenderMapQuery(stat_request, request_handler).AsMap());
                 }
+                else if (stat_request.at("type").AsString() == "Route")
+                {
+                    result_request.push_back(RouteQuery(stat_request, request_handler));
+                }
             }
             json::Print(Document(result_request), std::cout);
         }
@@ -361,9 +382,7 @@ namespace transport_catalogue
             if (bus)
             {
                 const auto &bus_info = request_handler.GetBusInfo(bus_name);
-                result = Builder{}.StartDict().Key("request_id").Value(result_id).Key("curvature").Value(bus_info->courvature)
-                .Key("route_length").Value(bus_info->route_length).Key("stop_count").Value(static_cast<int>(bus_info->count_all_stops))
-                .Key("unique_stop_count").Value(static_cast<int>(bus_info->count_unique_stops)).EndDict().Build();
+                result = Builder{}.StartDict().Key("request_id").Value(result_id).Key("curvature").Value(bus_info->courvature).Key("route_length").Value(bus_info->route_length).Key("stop_count").Value(static_cast<int>(bus_info->count_all_stops)).Key("unique_stop_count").Value(static_cast<int>(bus_info->count_unique_stops)).EndDict().Build();
             }
             else
             {
@@ -380,6 +399,44 @@ namespace transport_catalogue
             map.Render(out);
             result = Builder{}.StartDict().Key("request_id").Value(id).Key("map").Value(out.str()).EndDict().Build();
             return result;
+        }
+
+        json::Node JsonReader::RouteQuery(const Dict &stat_requests, request_handler::RequestHandler &request_handler) const
+        {
+            Builder result;
+            const int id = stat_requests.at("id").AsInt();
+            auto stop_from = stat_requests.at("from").AsString();
+            auto stop_to = stat_requests.at("to").AsString();
+            std::string str_not_found = "not found";
+            std::optional<std::pair<graph::Router<route::RouteWeight>::RouteInfo,
+                                    std::vector<route::RouteWeight>>>
+                routing = request_handler.GetRouting(stop_from, stop_to);
+            if (!routing)
+            {
+                result.StartDict().Key("request_id").Value(id).Key("error_message").Value(str_not_found).
+                EndDict();
+                return result.Build();
+            }
+                result.StartDict().Key("request_id").Value(id).Key("total_time").
+                Value(routing.value().first.weight.route_time).Key("items").StartArray();
+            
+            for (const route::RouteWeight &weight : routing.value().second)
+            {
+                if (weight.is_stop)
+                {
+                    result. StartDict().Key("type").Value("Wait").Key("stop_name").
+                    Value(std::string(weight.name)).Key("time"s).Value(weight.route_time).
+                    EndDict();
+                }
+                else
+                {
+                    result.StartDict().Key("type"s).Value("Bus"s).Key("bus"s).
+                    Value(std::string(weight.name)).Key("span_count"s).Value(weight.span_count).
+                    Key("time"s).Value(weight.route_time).EndDict();
+                }
+            }
+                result.EndArray().EndDict();
+            return result.Build();
         }
     }
 }

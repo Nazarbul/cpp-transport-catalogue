@@ -4,6 +4,7 @@
 #include <vector>
 #include <sstream>
 
+#include "transport_router.h"
 #include "transport_catalogue.h"
 #include "json.h"
 #include "map_render.h"
@@ -26,6 +27,8 @@ namespace transport_catalogue
             void FillCatalogue();
             const json::Node GetStatRequest();
             const json::Node GetRenderRequest();
+            const json::Node GetRoutingRequest();
+            route::RoutingSettings FillRouting(const Node &routing_settings) const;
             map_render::MapRender ParseNodeRequest(const Node &node);
             void ExecuteQueries(const Node &stat_requests, request_handler::RequestHandler &request_handler) const;
 
@@ -39,6 +42,7 @@ namespace transport_catalogue
             json::Node StopQuery(const Dict &stat_requests, const request_handler::RequestHandler &request_handler) const;
             json::Node BusQuery(const Dict &stat_requests, const request_handler::RequestHandler &request_handler) const;
             json::Node RenderMapQuery(const Dict &stat_requests, request_handler::RequestHandler &request_handler) const;
+            json::Node RouteQuery(const Dict &stat_requests, request_handler::RequestHandler &request_handler) const;
             void SetBasicSettings(map_render::RenderSettings &render_settings, const Dict &node);
             void SetLabelSettings(map_render::RenderSettings &render_settings, const Dict &node);
             void SetUnderlayerSettings(map_render::RenderSettings &render_settings, const Dict &node);

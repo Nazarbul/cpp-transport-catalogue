@@ -69,7 +69,7 @@ namespace transport_catalogue
         }
     }
 
-    size_t TransportCatalogue::GetDistanceBetweenStops(const domain::Stop *from, const domain::Stop *to) const
+    double TransportCatalogue::GetDistances(const domain::Stop *from, const domain::Stop *to) const
     {
         std::pair<const domain::Stop *, const domain::Stop *> stops = {from, to};
         auto result = distances.find(stops);
@@ -84,19 +84,7 @@ namespace transport_catalogue
         {
             return result->second;
         }
-        return 0;
-    }
-
-    double TransportCatalogue::GetDistances(const std::string_view busname) const
-    {
-        const domain::Bus *bus = FindBus(busname);
-        size_t size = bus->stops_.size() - 1;
-        double distance = 0.0;
-        for (size_t i = 0; i < size; ++i)
-        {
-            distance += static_cast<double>(GetDistanceBetweenStops(bus->stops_[i], bus->stops_[i + 1]));
-        }
-        return distance;
+        return 0.0;
     }
 
     const std::map<std::string_view, domain::Bus *> &TransportCatalogue::GetBuses() const
@@ -104,7 +92,7 @@ namespace transport_catalogue
         return busname_to_buses;
     }
 
-    const std::unordered_map<std::string_view, domain::Stop *> &TransportCatalogue::GetStops() const
+    const std::map<std::string_view, domain::Stop *> &TransportCatalogue::GetStops() const
     {
         return stopname_to_stops;
     }
@@ -118,7 +106,13 @@ namespace transport_catalogue
             bus_info.name_ = busname;
             bus_info.count_unique_stops = GetUniqueStops(busname);
             bus_info.count_all_stops = bus->stops_.size();
-            bus_info.route_length = GetDistances(busname);
+            std::vector<domain::Stop *> &stops = bus->stops_;
+            double route_length = 0.0;
+            for (size_t i = 0; i < bus_info.count_all_stops - 1; ++i)
+            {
+                route_length += GetDistances(stops[i], stops[i + 1]);
+            }
+            bus_info.route_length = route_length;
             bus_info.geo_length = GetLengthRoute(busname);
             bus_info.courvature = bus_info.route_length / bus_info.geo_length;
             return bus_info;

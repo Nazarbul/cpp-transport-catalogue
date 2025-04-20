@@ -74,7 +74,7 @@ namespace json
     {
         if (!std::holds_alternative<Dict>(GetCurrentValue()))
         {
-            throw std::logic_error("object isnt dict"s);
+            throw std::logic_error("object isnt dict");
         }
         nodes_stack.pop_back();
         return *this;
@@ -88,7 +88,7 @@ namespace json
     {
         if (!std::holds_alternative<Array>(GetCurrentValue()))
         {
-            throw std::logic_error("object isnt array"s);
+            throw std::logic_error("object isnt array");
         }
         nodes_stack.pop_back();
         return *this;
@@ -98,7 +98,7 @@ namespace json
     {
         if (!nodes_stack.empty())
         {
-            throw std::logic_error("invalid json"s);
+            throw std::logic_error("invalid json");
         }
         return std::move(node_);
     }
